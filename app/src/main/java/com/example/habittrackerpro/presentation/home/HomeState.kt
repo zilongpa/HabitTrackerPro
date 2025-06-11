@@ -10,5 +10,6 @@ import java.time.ZonedDateTime
  */
 data class HomeState(
     val currentDate: ZonedDateTime = ZonedDateTime.now(),
-    val habits: List<Habit> = emptyList()
+    val habits: List<Habit> = emptyList(),
+    val habitToDelete: Habit? = null
 )

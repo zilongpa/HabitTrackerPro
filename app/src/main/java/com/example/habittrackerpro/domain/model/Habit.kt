@@ -1,5 +1,6 @@
 package com.example.habittrackerpro.domain.model
 
+import java.time.ZonedDateTime
 import java.util.UUID
 
 /**
@@ -12,5 +13,5 @@ import java.util.UUID
 data class Habit(
     var id: String = UUID.randomUUID().toString(),
     val name: String,
-    var completedDates: List<Long>
+    var completedDates: List<ZonedDateTime>
 )

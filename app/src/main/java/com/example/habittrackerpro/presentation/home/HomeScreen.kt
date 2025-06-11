@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -21,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.habittrackerpro.presentation.home.components.HabitItem
-import com.example.habittrackerpro.domain.model.Habit
 
 /**
  * The main screen of the application, displaying the list of habits.
@@ -32,7 +33,24 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-
+// Show AlertDialog if a habit is marked for deletion
+    state.habitToDelete?.let { habit ->
+        AlertDialog (
+            onDismissRequest = { viewModel.onEvent(HomeEvent.OnDeleteHabitCancel) },
+            title = { Text(text = "Delete Habit") },
+            text = { Text(text = "Are you sure you want to delete '${habit.name}'?") },
+            confirmButton = {
+                Button(onClick = { viewModel.onEvent(HomeEvent.OnDeleteHabitConfirm) }) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { viewModel.onEvent(HomeEvent.OnDeleteHabitCancel) }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
@@ -57,7 +75,12 @@ fun HomeScreen(
             items(state.habits) { habit ->
                 HabitItem(
                     habit = habit,
-                    onHabitClick = { viewModel.onEvent(HomeEvent.OnHabitClick(it)) }
+                    onHabitClick = { viewModel.onEvent(HomeEvent.OnHabitClick(it)) },
+                    // Pass the new completion event to the ViewModel
+                    onCompletedClick = { isCompleted ->
+                        viewModel.onEvent(HomeEvent.OnCompletedClick(habit, isCompleted))
+                    },
+                    onHabitLongClick = { viewModel.onEvent(HomeEvent.OnHabitLongClick(habit)) }
                 )
             }
         }

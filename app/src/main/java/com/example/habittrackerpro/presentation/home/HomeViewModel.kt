@@ -29,16 +29,19 @@ class HomeViewModel @Inject constructor(
     val state = _state.asStateFlow()
 
     init {
-        // Start observing the habits from the repository as soon as the ViewModel is created.
-        repository.getAllHabits().onEach { habits ->
+        repository.getAllHabits().onEach { entityList ->
             _state.update {
-                // We need to map from HabitEntity to our domain Habit model
-                // For now, we'll create a simple mapping.
-                // A proper mapper class would be better in a larger project.
-                val domainHabits = habits.map {
-                    Habit(
-                        id = it.id, name = it.name, completedDates = it.completedDates
-                    )
+                // When mapping from Entity to Domain model, include completedDates
+                val domainHabits = entityList.map { entity ->
+                    Habit(id = entity.id,
+                        name = entity.name,
+                        completedDates = entity.completedDates.map { timestamp ->
+                            // Assuming timestamps are stored as Long (epoch seconds)
+                            ZonedDateTime.ofInstant(
+                                java.time.Instant.ofEpochSecond(timestamp),
+                                java.time.ZoneId.systemDefault()
+                            )
+                        })
                 }
                 it.copy(
                     habits = domainHabits
@@ -93,6 +96,30 @@ class HomeViewModel @Inject constructor(
                     repository.updateHabit(habitToUpdate)
                 }
             }
+
+            // Handle deletion confirmation
+            is HomeEvent.OnDeleteHabitConfirm -> {
+                viewModelScope.launch {
+                    state.value.habitToDelete?.let { habit ->
+                        val entityToDelete = HabitEntity(
+                            id = habit.id,
+                            name = habit.name,
+                            completedDates = habit.completedDates.map { it.toEpochSecond() },
+                            frequency = emptyList(), // These fields need to be present for the entity
+                            reminder = 0L,
+                            startDate = 0L
+                        )
+                        repository.deleteHabit(entityToDelete)
+                    }
+                    // Hide the dialog after deletion
+                    _state.update { it.copy(habitToDelete = null) }
+                }
             }
+
+            // Handle deletion cancellation
+            is HomeEvent.OnDeleteHabitCancel -> {
+                _state.update { it.copy(habitToDelete = null) }
+            }
+        }
     }
 }

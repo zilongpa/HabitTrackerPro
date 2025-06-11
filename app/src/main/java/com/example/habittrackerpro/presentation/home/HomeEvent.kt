@@ -24,4 +24,10 @@ sealed interface HomeEvent {
 
     // Add a new event for when the completion checkbox is clicked
     data class OnCompletedClick(val habit: Habit, val isCompleted: Boolean) : HomeEvent
+
+    // Triggered when the user confirms the deletion in the dialog
+    object OnDeleteHabitConfirm : HomeEvent
+
+    // Triggered when the user cancels the deletion dialog
+    object OnDeleteHabitCancel : HomeEvent
 }
