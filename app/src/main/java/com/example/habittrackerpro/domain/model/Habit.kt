@@ -10,6 +10,7 @@ import java.util.UUID
  * @param name The name of the habit.
  */
 data class Habit(
-    val id: String = UUID.randomUUID().toString(),
-    val name: String
+    var id: String = UUID.randomUUID().toString(),
+    val name: String,
+    var completedDates: List<Long>
 )

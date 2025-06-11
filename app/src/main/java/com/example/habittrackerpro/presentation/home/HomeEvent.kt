@@ -21,4 +21,7 @@ sealed interface HomeEvent {
      * @param habit The habit that was long-pressed.
      */
     data class OnHabitLongClick(val habit: Habit) : HomeEvent
+
+    // Add a new event for when the completion checkbox is clicked
+    data class OnCompletedClick(val habit: Habit, val isCompleted: Boolean) : HomeEvent
 }

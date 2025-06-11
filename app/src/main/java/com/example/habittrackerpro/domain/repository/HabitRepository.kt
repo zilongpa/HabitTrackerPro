@@ -22,4 +22,7 @@ interface HabitRepository {
     /** Deletes a habit. */
     suspend fun deleteHabit(habit: HabitEntity)
 
+    /** Updates a habit. */
+    suspend fun updateHabit(habit: HabitEntity)
+
 }
